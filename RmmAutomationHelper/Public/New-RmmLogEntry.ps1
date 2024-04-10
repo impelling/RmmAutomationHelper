@@ -34,7 +34,7 @@ function New-RmmLogEntry {
     [CmdletBinding()]
     param (
         # The message to log
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true, ValueFromPipeline)]
         [string]$Message,
         # Destination of the log entry
         [Parameter()]
