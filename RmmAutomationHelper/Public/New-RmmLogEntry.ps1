@@ -31,7 +31,7 @@ function New-RmmLogEntry {
         New-RmmLogEntry -Message 'This is a test message' -Destination 'Both' -Level 'Information'
         Will log the message to the event log and a file with the level of Information.
     #>
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess = $true)]
     param (
         # The message to log
         [Parameter(Mandatory = $true, ValueFromPipeline)]
@@ -65,11 +65,19 @@ function New-RmmLogEntry {
     )
 
     begin {
+
+        $WhatIf = $WhatIfPreference.IsPresent
+
         # Create the log structure if file output is required
         if ($Destination -in 'File', 'Both') {
             if (-not (Test-Path -Path $LogDirectory)) {
                 Write-Verbose "Creating log directory $LogDirectory"
-                New-Item -Path $LogDirectory -ItemType Directory -Force | Out-Null
+                if (-not $WhatIf) {
+                    New-Item -Path $LogDirectory -ItemType Directory -Force | Out-Null
+                }
+                else {
+                    Write-Output "WhatIf: Creating log directory $LogDirectory"
+                }
             }
         }
         # Create the event log and source if event log output is required
@@ -84,7 +92,12 @@ function New-RmmLogEntry {
                 catch {
                     Write-Verbose 'Event log does not exist, creating it'
                     try {
-                        New-EventLog -LogName $EventLogName -Source $Subject
+                        if (-not $WhatIf) {
+                            New-EventLog -LogName $EventLogName -Source $Subject
+                        }
+                        else {
+                            Write-Output "WhatIf: Creating event log $EventLogName with source $Subject"
+                        }
                     }
                     catch {
                         Write-Error 'Failed to create event log.'
@@ -94,8 +107,13 @@ function New-RmmLogEntry {
                 if (-not [System.Diagnostics.EventLog]::SourceExists($Subject)) {
                     Write-Verbose 'Event source does not exist, creating it'
                     try {
-                        # Create a new source on the $EventLogName log
-                        [System.Diagnostics.EventLog]::CreateEventSource($Subject, $EventLogName)
+                        if (-not $WhatIf) {
+                            # Create a new source on the $EventLogName log
+                            [System.Diagnostics.EventLog]::CreateEventSource($Subject, $EventLogName)
+                        }
+                        else {
+                            Write-Output "WhatIf: Creating event source $Subject on log $EventLogName"
+                        }
                     }
                     catch {
                         Write-Error 'Failed to create event log.'
@@ -124,7 +142,12 @@ function New-RmmLogEntry {
             }
             Write-Verbose "Logging to event log $EventLogName with source $Subject and message $Message"
             try {
-                Write-EventLog @EventParams -ErrorAction SilentlyContinue
+                if (-not $WhatIf) {
+                    Write-EventLog @EventParams -ErrorAction SilentlyContinue
+                }
+                else {
+                    Write-Output "WhatIf: Logging to event log $EventLogName with source $Subject and message $Message"
+                }
             }
             catch {
                 if ($Destination -eq 'Event') {
@@ -144,8 +167,16 @@ function New-RmmLogEntry {
             if (-not $SkipDatetime) {
                 $LogMessage = '[{0:yyyy-MM-dd HH:mm:ss}] {1}' -f (Get-Date), $Message
             }
+            else {
+                $LogMessage = $Message
+            }
             Write-Verbose "Logging to file $LogFile with message $LogMessage"
-            Add-Content -Path $LogFile -Value $LogMessage
+            if (-not $WhatIf) {
+                Add-Content -Path $LogFile -Value $LogMessage
+            }
+            else {
+                Write-Output "WhatIf: Logging to file $LogFile with message $LogMessage"
+            }
         }
     }
 
