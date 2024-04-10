@@ -11,7 +11,7 @@
 
 This is the code for a Powershell module intended to streamline with automation within Ninja. It is not affiliated with Ninja or any other vendor in any way.
 
-It is written purely for [PowerShell 7.1](https://docs.microsoft.com/en-us/powershell/scripting/whats-new/what-s-new-in-powershell-71?view=powershell-7.1) or greater. No apologies will be made for failures in Powershell 5.1.
+It is written purely for [PowerShell 5.1](https://learn.microsoft.com/en-us/powershell/scripting/overview?view=powershell-5.1). No apologies will be made for failures in Powershell other than 5.1.
 
 Some of the code within this module is inspired by the wonderful contributions to the [Ninja Discord Server](https://discord.gg/NinjaOne).
 
