@@ -1,0 +1,20 @@
+name: Publish new version
+
+on:
+  push:
+    tags: '*'
+
+jobs:
+  publish:
+    name: Publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4.1.2
+
+      - name: Build, update and publish module
+        uses: impelling/powershell-module-action@0.0.1
+        id: Process-module
+        with:
+          PSGalleryKey: ${{ secrets.POWERSHELL_GALLERY_KEY }}
+          Version: ${{ github.ref_name }}
+          Publish: true

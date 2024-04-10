@@ -1,0 +1,25 @@
+name: Analyse code validity
+
+on:
+  pull_request:
+    branches: [
+      main,
+      staging,
+      dev
+    ]
+
+jobs:
+  analyse:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Analyse code validity in container
+        uses: microsoft/psscriptanalyzer-action@v1.1
+        with:
+          path: RmmAutomationHelper
+          recurse: true
+          output: results.sarif
+      - name: Upload SARIF results
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: results.sarif
